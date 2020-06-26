@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Asterisk,VoIP,PJSIP," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Asterisk on OpenWRT2020春节因为新型肺炎的疫情，在家要呆😳近20天，于是把一直想折腾的VoIP on OpenWRT完成。参考了配置EPON家庭网关接入中国电信电话交换IP网络及其另外一篇博文，但一些设置没法同样实现。 1. 准备工作1.1 网络拓扑光纤是电信的，光猫是ZTE的F450G，桥接到X86的OpenWRT（ver：19.07.1）拨号上网，同时设置VLAN接入电">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Asterisk on OpenWRT">
+<meta property="og:url" content="http://yoursite.com/2020/02/09/Asterisk-on-OpenWRT/index.html">
+<meta property="og:site_name" content="点滴记忆">
+<meta property="og:description" content="Asterisk on OpenWRT2020春节因为新型肺炎的疫情，在家要呆😳近20天，于是把一直想折腾的VoIP on OpenWRT完成。参考了配置EPON家庭网关接入中国电信电话交换IP网络及其另外一篇博文，但一些设置没法同样实现。 1. 准备工作1.1 网络拓扑光纤是电信的，光猫是ZTE的F450G，桥接到X86的OpenWRT（ver：19.07.1）拨号上网，同时设置VLAN接入电">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/komeloo/kome-img/master/blog/imgnetwork.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/komeloo/kome-img/master/blog/img20200210224037.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/komeloo/kome-img/master/blog/img20200211085127.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/komeloo/kome-img/master/blog/img20200211120102.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/komeloo/kome-img/master/blog/img20200211132331.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/komeloo/kome-img/master/blog/img20200211153940.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/komeloo/kome-img/master/blog/img20200211193257.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/komeloo/kome-img/master/blog/img20200212231940.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/komeloo/kome-img/master/blog/img20200213224340.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/komeloo/kome-img/master/blog/img20200212235508.png">
+<meta property="article:published_time" content="2020-02-09T02:15:00.000Z">
+<meta property="article:modified_time" content="2020-06-26T07:43:01.166Z">
+<meta property="article:author" content="KOMELOO">
+<meta property="article:tag" content="Asterisk">
+<meta property="article:tag" content="VoIP">
+<meta property="article:tag" content="PJSIP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/komeloo/kome-img/master/blog/imgnetwork.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"right","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/02/09/Asterisk-on-OpenWRT/"/>
+
+
+
+
+
+  <title>Asterisk on OpenWRT | 点滴记忆</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">点滴记忆</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/02/09/Asterisk-on-OpenWRT/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="KOMELOO">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="点滴记忆">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Asterisk on OpenWRT</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-02-09T10:15:00+08:00">
+                2020-02-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Asterisk/" itemprop="url" rel="index">
+                    <span itemprop="name">Asterisk</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Asterisk-on-OpenWRT"><a href="#Asterisk-on-OpenWRT" class="headerlink" title="Asterisk on OpenWRT"></a>Asterisk on OpenWRT</h1><p>2020春节因为新型肺炎的疫情，在家要呆😳近20天，于是把一直想折腾的VoIP on OpenWRT完成。参考了<a href="http://zhmail.com/2016/09/24/configuring-epon-e8-c-gateway-to-access-ctc-voip-network/" target="_blank" rel="noopener">配置EPON家庭网关接入中国电信电话交换IP网络</a>及其另外一篇博文，但一些设置没法同样实现。</p>
+<h2 id="1-准备工作"><a href="#1-准备工作" class="headerlink" title="1. 准备工作"></a>1. 准备工作</h2><h3 id="1-1-网络拓扑"><a href="#1-1-网络拓扑" class="headerlink" title="1.1 网络拓扑"></a>1.1 网络拓扑</h3><p>光纤是电信的，光猫是ZTE的F450G，桥接到X86的OpenWRT（ver：19.07.1）拨号上网，同时设置VLAN接入电信IPTV。F450G的一个LAN口接软路由的WAN（物理eth0）口，F450G的LAN保留192.168.1.1，电信的模拟电话仍然接在F450G的电话口上；软路由的LAN使用192.168.10.x网段，物理eth0上建立一个新的连接DSL，ip地址是192.168.1.5：<br><img src="https://raw.githubusercontent.com/komeloo/kome-img/master/blog/imgnetwork.jpg" alt="网络拓扑"></p>
+<a id="more"></a>
+<p>DSL接口设置：<br><img src="https://raw.githubusercontent.com/komeloo/kome-img/master/blog/img20200210224037.png" alt="设置"><br>由于需要接在F450G上的模拟电话工作，需要设置防火墙。DSL的Firewall Zone：<br><img src="https://raw.githubusercontent.com/komeloo/kome-img/master/blog/img20200211085127.png" alt=""></p>
+<h3 id="1-2-F450G信息收集"><a href="#1-2-F450G信息收集" class="headerlink" title="1.2 F450G信息收集"></a>1.2 F450G信息收集</h3><p>拿到超级密码后（网上有方法，不再赘述），开通F450G的telnet，一些电信VoIP的参数需要保存下来：<br>关于电话的参数很重要，后面需要用到：<br><img src="https://raw.githubusercontent.com/komeloo/kome-img/master/blog/img20200211120102.png" alt=""><br>可以看到，VoIP的网关为28.81.255.254；DNS为15.192.252.188和15.192.251.188；</p>
+<p><img src="https://raw.githubusercontent.com/komeloo/kome-img/master/blog/img20200211132331.png" alt=""><br>路由的信息也很关键，软路由的路由设置需要这些。</p>
+<p>还有应用-&gt;宽带电话设置-&gt;基本配置下的数据，忘记截屏了：<br>  主SIP代理IP地址:sh.ctcims.cn<br>  主SIP外部代理IP地址:BAC10.pd.sh.ctcims.cn<br>  用户号码：+8621xxxxxxxx<br>  鉴权用户名：<a href="mailto:+8621xxxxxxxx@sh.ctcims.cn">+8621xxxxxxxx@sh.ctcims.cn</a><br>  密码：xxxxxx</p>
+<h2 id="2-开始工作"><a href="#2-开始工作" class="headerlink" title="2. 开始工作"></a>2. 开始工作</h2><h3 id="2-1-OpenWRT-相关软件安装"><a href="#2-1-OpenWRT-相关软件安装" class="headerlink" title="2.1 OpenWRT 相关软件安装"></a>2.1 OpenWRT 相关软件安装</h3><p>安装dnsmasq-full：</p>
+<pre><code>opkg install dnsmasq-full</code></pre><p>安装Asterisk相关的软件(chan_PJSIP)：</p>
+<pre><code>opkg install asterisk16 asterisk16-app-controlplayback asterisk16-app-mp3 asterisk16-bridge-builtin-features asterisk16-bridge-builtin-interval-features asterisk16-bridge-holding asterisk16-bridge-native-rtp asterisk16-bridge-simple asterisk16-bridge-softmix asterisk16-codec-alaw asterisk16-codec-g722 asterisk16-codec-g726 asterisk16-codec-g729 asterisk16-codec-gsm asterisk16-codec-opus asterisk16-codec-ulaw asterisk16-format-gsm asterisk16-format-wav asterisk16-format-wav-gsm asterisk16-pjsip asterisk16-res-adsi asterisk16-res-http-websocket asterisk16-res-pjproject asterisk16-res-rtp-asterisk asterisk16-res-smdi asterisk16-res-sorcery asterisk16-sounds asterisk16-voicemail</code></pre><h3 id="2-2-参数配置"><a href="#2-2-参数配置" class="headerlink" title="2.2 参数配置"></a>2.2 参数配置</h3><p>在F450G上只能有一个Vlan 46的网络，没法按照开头所参考的blog，但思路是建立从Asterisk到F450G的路由：</p>
+<pre><code>dnsmasq.conf:
+server=/sh.ctcims.cn/15.192.252.188
+server=/sh.ctcims.cn/15.192.251.188
+addn-hosts=/etc/dnsmasq.hosts.addn
+
+dnsmasq.hosts.addn:
+15.192.60.83 sh.ctcims.cn
+#15.192.60.87 sh.ctcims.cn</code></pre><p>由于中国电信在VoIP上使用的15段和28段IP并不能通过正常路由来转发，需要在软路由上设置路由强迫VoIP相关的15和28网段走Vlan46, 15.192.60.83及15.192.60.87是BAC10.pd.sh.ctcims.cn地址，可以在F450G上ping得到，但使用下来，只能用一个，不然Asterisk会报错（unable to find authenticate header in challenge）。<br><img src="https://raw.githubusercontent.com/komeloo/kome-img/master/blog/img20200211153940.png" alt=""></p>
+<pre><code>/etc/config/network:
+config route
+    option interface &apos;DSL&apos;
+    option target &apos;15.192.0.0&apos;
+    option netmask &apos;255.255.0.0&apos;
+    option gateway &apos;192.168.1.1&apos;
+
+    config route
+    option interface &apos;DSL&apos;
+    option target &apos;28.81.128.0&apos;
+    option netmask &apos;255.255.128.0&apos;
+    option gateway &apos;192.168.1.1&apos;</code></pre><p>这样软路由上的Asterisk就可以和中国电信的VoIP服务器交流。</p>
+<pre><code>/etc/asterisk/pjsip.conf:
+[transport-udp]
+type=transport
+protocol=udp    ;udp,tcp,tls,ws,wss
+bind=0.0.0.0
+local_net=127.0.0.1
+local_net=192.168.1.0/24
+local_net=192.168.10.0/24
+
+[mytrunk]
+type=registration
+transport=transport-udp
+outbound_auth=mytrunk_auth
+server_uri=sip:sh.ctcims.cn:5060
+client_uri=sip:+8621xxxxxxxx@sh.ctcims.cn:5060
+retry_interval=60
+fatal_retry_interval=30
+forbidden_retry_interval=600
+max_retries=10000
+expiration=3600
+line=yes
+endpoint=mytrunk
+auth_rejection_permanent=no
+
+[mytrunk_auth]
+type=auth
+auth_type=userpass
+password=xxxxxx
+username=+8621xxxxxxxx0@sh.ctcims.cn
+realm=sh.ctcims.cn
+
+[mytrunk]
+type=endpoint
+transport=transport-udp
+context=from-external
+disallow=all
+allow=ulaw,alaw,gsm,g726,g722,g729
+aors=mytrunk
+outbound_auth=mytrunk_auth
+from_domain=sh.ctcims.cn
+from_user=+8621xxxxxxxx
+rewrite_contact=yes
+force_rport=yes    ;It&apos;s a good idea to read the configuration help for each
+rtp_symmetric=yes
+direct_media=no
+dtmf_mode=auto
+
+[mytrunk]
+type=aor
+qualify_frequency=60
+contact=sip:+8621xxxxxxxx@sh.ctcims.cn:5060
+
+[mytrunk]
+type=identify
+endpoint=mytrunk
+match=15.192.0.0/16
+
+[301]
+type=endpoint
+transport=transport-udp
+context=from-internal
+disallow=all
+allow=ulaw,g729,alaw
+;allow=gsm
+auth=301
+aors=301
+direct_media=no
+device_state_busy_at=1
+allow_subscribe=yes
+sub_min_expiry=30
+
+[301]
+type=auth
+auth_type=userpass
+password=301
+username=301
+
+[301]
+type=aor
+max_contacts=3
+contact=sip:301@192.168.10.1:5060</code></pre><p>extensions.conf</p>
+<pre><code>/etc/asterisk/extensions.conf
+[from-external]
+exten =&gt; s,1,Answer()
+same =&gt; n,BackGround(enter-ext-of-person)
+  same =&gt; n, WaitExten(5)
+exten =&gt; _3XX,1,Answer()
+   same =&gt; n,Dial(PJSIP/${EXTEN},20,tr)
+   same =&gt; n,Hangup()
+exten =&gt; i,1,Playback(invalid)
+  same =&gt; n,Goto(from-external,s,1)
+exten =&gt; t,1,Playback(goodbye)
+  same =&gt; n, Hangup()
+
+[from-internal]
+include =&gt; outbound-local
+include =&gt; internal-call
+
+[outbound-local]
+ignorepat =&gt; 9
+exten =&gt; 119,1,Dial(PJSIP/119@mytrunk)
+exten =&gt; 9119,1,Dial(PJSIP/119@mytrunk)
+exten =&gt; 110,1,Dial(PJSIP/110@mytrunk)
+exten =&gt; 9110,1,Dial(PJSIP/110@mytrunk)
+exten =&gt; 120,1,Dial(PJSIP/120@mytrunk)
+exten =&gt; 9120,1,Dial(PJSIP/120@mytrunk)
+exten =&gt;_9.,1,Dial(PJSIP/${EXTEN:1}@mytrunk,20,r)
+  same =&gt; n,Congestion()
+  same =&gt; 102,Congestion()
+
+[internal-call]
+exten =&gt; _3XX,1,Answer()
+same =&gt; n,Dial(PJSIP/${EXTEN},20,tr)
+same =&gt; n,Hangup()</code></pre><p>/etc/asterisk/indications.conf</p>
+<pre><code>/etc/asterisk/indications.conf
+[general]
+country=cn</code></pre><p>现在应该可以在电脑上用软电话拨号了，推荐MicroSIP软件，设置简单，日志读取方便，可以在调试时使用。</p>
+<p>###2.3 模拟电话接F450G电话口通话<br>光猫设置如下：<br><img src="https://raw.githubusercontent.com/komeloo/kome-img/master/blog/img20200211193257.png" alt=""></p>
+<p>在光猫上增加192.168.1.0网段到软路由LAN192.168.10.0网段的路由：</p>
+<pre><code>ip route add 192.168.10.0/24 via 192.168.1.5</code></pre><p>在软路由上打开DSL接口相关的防火墙：<br><img src="https://raw.githubusercontent.com/komeloo/kome-img/master/blog/img20200212231940.png" alt=""></p>
+<p>##3. 结束部分<br>到场这个小型电话交换机应该可以很好工作，但还是有些问题：<br>###3.1 光猫设置的路由没法保存，网页里的静态路由设置总是出错，不能保存。想了一个办法通过软路由telnet到光猫增加，以下是telnet.pl，添加到cron每5分钟跑一次，万一光猫重启，5分钟后这段路由就加上了：<br><img src="https://raw.githubusercontent.com/komeloo/kome-img/master/blog/img20200213224340.png" alt=""></p>
+<pre><code>telnet.pl
+#!/usr/bin/perl
+use Net::Telnet();
+
+my @table=qw(0.0.0.0 128.0.0.0 192.0.0.0 224.0.0.0 240.0.0.0 248.0.0.0 252.0.0.0 254.0.0.0 255.0.0.0 255.128.0.0 255.192.0.0 255.224.0.0 255.240.0.0 255.248.0.0 255.252.0.0 255.254.0.0 255.255.0.0 255.255.128.0 255.255.192.0 255.255.224.0 255.255.240.0 255.255.248.0 255.255.252.0 255.255.254.0 255.255.255.0 255.255.255.128 255.255.255.192 255.255.255.224 255.255.255.240 255.255.255.248 255.255.255.252 255.255.255.254 255.255.255.255);
+my $dest_ip=&quot;192.168.10.0&quot;;
+my $dest_gate=&quot;192.168.1.5&quot;;
+my $has_route=0;
+my $t=Net::Telnet-&gt;new(Host=&gt;&quot;192.168.1.1&quot;, Timeout=&gt;10);
+$t-&gt;login(&quot;root&quot;,&quot;xxxx&quot;);
+$t-&gt;cmd(&quot;linuxshell&quot;);
+@lines=$t-&gt;cmd(&quot;route | grep 192.168.10.&quot;);
+$count=@lines;
+
+if ($count eq 0) {
+     add_route($t);
+ }
+ else
+ {
+      foreach $c (@lines) {
+            print $c;
+            my ($dest,$gate,$mask,$flag,$metric,$ref,$use,$iface) = split / +/,$c;
+            if (($dest eq &quot;192.168.10.0&quot;) and ($gate eq $dest_gate))
+              {
+                   print &quot;Right route: $dest via $gate mask $mask exist!\n&quot;;
+                   $has_route=1;
+                   last;
+              }
+            else {
+             print &quot;Del route: $dest via $gate mask $mask!\n&quot;;
+                 del_route($t, $dest, mask2cidr($mask));
+              }
+    }
+
+    if ($has_route eq 0) {
+        add_route($t);
+    }
+}
+$t-&gt;close();
+
+
+sub add_route{
+    $_[0]-&gt;cmd(&quot;ip route add 192.168.10.0/24 via 192.168.1.5&quot;);
+}
+
+sub del_route{
+    $_[0]-&gt;cmd(&quot;ip route del $_[1]/$_[2]&quot;);
+}
+
+sub mask2cidr {
+   for (my $i=0;$i&lt;=32;$i++) {
+   if ($table[i] eq $_[0]) {return $i;}
+   }
+}</code></pre><p>每次重启，光猫的语音绑定接口总是epon0.1,需要手动改动LAN，不然光猫上的模拟电话就没法工作。<br><img src="https://raw.githubusercontent.com/komeloo/kome-img/master/blog/img20200212235508.png" alt=""></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Asterisk/" rel="tag"># Asterisk</a>
+          
+            <a href="/tags/VoIP/" rel="tag"># VoIP</a>
+          
+            <a href="/tags/PJSIP/" rel="tag"># PJSIP</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/10/08/ZFS-Snapshot-Remote-Backup-Using-SSH-with-Non-root/" rel="next" title="ZFS Snapshot Remote Backup Using SSH with Non-root">
+                <i class="fa fa-chevron-left"></i> ZFS Snapshot Remote Backup Using SSH with Non-root
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/03/01/Samba-Join-Windows-2016-AD-as-Domain-Member/" rel="prev" title="Samba Join Windows 2016 AD as Domain Member (update)">
+                Samba Join Windows 2016 AD as Domain Member (update) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpg"
+                alt="KOMELOO" />
+            
+              <p class="site-author-name" itemprop="name">KOMELOO</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%20%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">categories</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-name">tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/komeloo" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Asterisk-on-OpenWRT"><span class="nav-number">1.</span> <span class="nav-text">Asterisk on OpenWRT</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-准备工作"><span class="nav-number">1.1.</span> <span class="nav-text">1. 准备工作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-网络拓扑"><span class="nav-number">1.1.1.</span> <span class="nav-text">1.1 网络拓扑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-F450G信息收集"><span class="nav-number">1.1.2.</span> <span class="nav-text">1.2 F450G信息收集</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-开始工作"><span class="nav-number">1.2.</span> <span class="nav-text">2. 开始工作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-OpenWRT-相关软件安装"><span class="nav-number">1.2.1.</span> <span class="nav-text">2.1 OpenWRT 相关软件安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-参数配置"><span class="nav-number">1.2.2.</span> <span class="nav-text">2.2 参数配置</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">KOMELOO</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
